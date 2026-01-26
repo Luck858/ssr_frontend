@@ -161,13 +161,13 @@ export default function CombinedApplicantDetails({ data = {}, onNext, onPrevious
     if (!files || !files[0]) return;
     const file = files[0];
     try {
-      // upload to server and store returned url
+      // upload to server and store returned file object (not just URL)
       const res = await uploadSingleFile(file);
       const fileObj = res.file || res.data?.file || res;
-      const url = fileObj?.url || fileObj?.file?.url || '';
-      if (url) {
-        setUploadedFiles((prev) => ({ ...prev, [name]: url }));
-        setPreviews((prev) => ({ ...prev, [name]: url }));
+      if (fileObj && fileObj.url) {
+        // Store the entire file object with all metadata
+        setUploadedFiles((prev) => ({ ...prev, [name]: fileObj }));
+        setPreviews((prev) => ({ ...prev, [name]: fileObj.url }));
       }
     } catch (err) {
       console.error('Upload failed', err);
@@ -182,10 +182,10 @@ export default function CombinedApplicantDetails({ data = {}, onNext, onPrevious
     try {
       const res = await uploadSingleFile(file);
       const fileObj = res.file || res.data?.file || res;
-      const url = fileObj?.url || '';
-      if (url) {
-        setSignatureUpload((prev) => ({ ...prev, [name]: url }));
-        setSignaturePreviews((prev) => ({ ...prev, [name]: url }));
+      if (fileObj && fileObj.url) {
+        // Store the entire file object with all metadata
+        setSignatureUpload((prev) => ({ ...prev, [name]: fileObj }));
+        setSignaturePreviews((prev) => ({ ...prev, [name]: fileObj.url }));
       }
     } catch (err) {
       console.error('Signature upload failed', err);
@@ -719,21 +719,26 @@ export default function CombinedApplicantDetails({ data = {}, onNext, onPrevious
               </div>
 
               <div style={{ display: 'grid', gap: 10 }}>
-                {fileFields.map((field) => (
+                {fileFields.map((field) => {
+                  const preview = previews[field];
+                  const previewUrl = typeof preview === 'string' ? preview : preview?.url || preview;
+                  const isImage = typeof previewUrl === 'string' && (previewUrl.startsWith('data:image') || /\.(jpg|jpeg|png)$/i.test(previewUrl));
+                  return (
                   <div key={field} style={{ display: 'flex', flexDirection: 'column' }}>
                     <label style={styles.label}>{fileLabels[field]}</label>
                     <input type="file" name={field} accept=".pdf,.jpg,.jpeg,.png" onChange={handleUploadedFile} style={styles.fileInput} />
-                    {previews[field] && (
+                    {preview && (
                       <div style={styles.preview}>
-                        {previews[field].startsWith('data:image') ? (
-                          <img src={previews[field]} alt="preview" style={styles.previewImage} />
+                        {isImage ? (
+                          <img src={previewUrl} alt="preview" style={styles.previewImage} />
                         ) : (
-                          <div style={{ fontSize: 13 }}>PDF selected</div>
+                          <div style={{ fontSize: 13 }}>File selected</div>
                         )}
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -861,11 +866,16 @@ export default function CombinedApplicantDetails({ data = {}, onNext, onPrevious
                 <InlineError msg={errors.studentSignature} />
                 {signaturePreviews.studentSignature && (
                   <div style={styles.preview}>
-                    {signaturePreviews.studentSignature.startsWith('data:image') ? (
-                      <img src={signaturePreviews.studentSignature} alt="signature" style={styles.previewImage} />
-                    ) : (
-                      <div style={{ fontSize: 13 }}>PDF selected</div>
-                    )}
+                    {(() => {
+                      const preview = signaturePreviews.studentSignature;
+                      const previewUrl = typeof preview === 'string' ? preview : preview?.url || preview;
+                      const isImage = typeof previewUrl === 'string' && (previewUrl.startsWith('data:image') || /\.(jpg|jpeg|png)$/i.test(previewUrl));
+                      return isImage ? (
+                        <img src={previewUrl} alt="signature" style={styles.previewImage} />
+                      ) : (
+                        <div style={{ fontSize: 13 }}>File selected</div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -876,7 +886,11 @@ export default function CombinedApplicantDetails({ data = {}, onNext, onPrevious
                 <InlineError msg={errors.passportSizePhoto} />
                 {signaturePreviews.passportSizePhoto && (
                   <div style={styles.preview}>
-                    <img src={signaturePreviews.passportSizePhoto} alt="passport" style={styles.previewImage} />
+                    {(() => {
+                      const preview = signaturePreviews.passportSizePhoto;
+                      const previewUrl = typeof preview === 'string' ? preview : preview?.url || preview;
+                      return <img src={previewUrl} alt="passport" style={styles.previewImage} />;
+                    })()}
                   </div>
                 )}
               </div>
