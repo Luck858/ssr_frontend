@@ -32,6 +32,7 @@ const TimetablePreparation = () => {
   });
 
   const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [filteredAllocations, setFilteredAllocations] = useState([]);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -86,8 +87,10 @@ const TimetablePreparation = () => {
     try {
       const response = await fetchTeacherandSubjectAllocations(departmentId, batchId, section);
       if (response.success) {
+        console.log("Allocations fetched:", response.data);
         setAllocations(response.data);
         setSelectedTeacher("");
+        setFilteredAllocations(response.data);
         setFormData((prev) => ({ ...prev, teacherAllocation: "" }));
       }
     } catch (error) {
@@ -130,6 +133,18 @@ const TimetablePreparation = () => {
     if (selectedBatch && selectedDepartment && section) {
       fetchAllocations(selectedDepartment, selectedBatch, section);
     }
+  };
+
+  const handleTeacherChange = (e) => {
+    const teacherId = e.target.value;
+    setSelectedTeacher(teacherId);
+    if (teacherId) {
+      const teacherAllocations = allocations.filter((a) => a.teacher._id === teacherId);
+      setFilteredAllocations(teacherAllocations);
+    } else {
+      setFilteredAllocations(allocations);
+    }
+    setFormData((prev) => ({ ...prev, teacherAllocation: "" }));
   };
 
   const handleSubmit = async (e) => {
@@ -438,6 +453,28 @@ const TimetablePreparation = () => {
               <form onSubmit={handleSubmit}>
                 <div className="form-grid">
                   <div>
+                    <label className="form-label-strong">Teacher</label>
+                    <select
+                      value={selectedTeacher}
+                      onChange={handleTeacherChange}
+                      className="form-control"
+                    >
+                      <option value="">Select Teacher (Optional)</option>
+                      {[...new Set(allocations
+                        .filter((a) => a.teacher && a.teacher._id)
+                        .map((a) => a.teacher._id)
+                      )].map((teacherId) => {
+                        const teacher = allocations.find((a) => a.teacher?._id === teacherId)?.teacher;
+                        return teacher ? (
+                          <option key={teacherId} value={teacherId}>
+                            {teacher.name}
+                          </option>
+                        ) : null;
+                      })}
+                    </select>
+                  </div>
+
+                  <div>
                     <label className="form-label-strong">Day of Week</label>
                     <select
                       value={formData.dayOfWeek}
@@ -481,7 +518,7 @@ const TimetablePreparation = () => {
                       value={formData.teacherAllocation}
                       onChange={(e) => {
                         const allocationId = e.target.value;
-                        const alloc = allocations.find((a) => a._id === allocationId);
+                        const alloc = filteredAllocations.find((a) => a._id === allocationId);
                         if (alloc && alloc.teacher) setSelectedTeacher(alloc.teacher._id);
                         setFormData({ ...formData, teacherAllocation: allocationId });
                       }}
@@ -489,7 +526,7 @@ const TimetablePreparation = () => {
                       className="form-control"
                     >
                       <option value="">Select Subject</option>
-                      {allocations.map((allocation) => (
+                      {filteredAllocations.map((allocation) => (
                         <option key={allocation._id} value={allocation._id}>
                           {allocation.subject?.subjectName}
                         </option>
@@ -546,7 +583,7 @@ const TimetablePreparation = () => {
                 
                 {/* Timetable Rows */}
                 {periods.map((period) => (
-                  <>
+                  <React.Fragment key={`period-${period.number}`}>
                     <div className="day-header">
                       <div>P{period.number}</div>
                       <small style={{ fontSize: "11px", opacity: 0.9 }}>
@@ -591,7 +628,7 @@ const TimetablePreparation = () => {
                         </div>
                       );
                     })}
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             </section>
