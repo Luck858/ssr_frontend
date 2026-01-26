@@ -135,6 +135,8 @@ const AdminRegisterUser = () => {
 
     try {
       const response = await fetchDepartementsByCousresData(courseId);
+      console.log(courseId)
+      console.log(response)
       if (response.success && response.data && response.data.length > 0) {
         setDepartments(response.data);
         
