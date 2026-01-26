@@ -86,6 +86,7 @@ const TeacherAllocation = () => {
   const fetchBatches = async (departmentId) => {
     try {
       const response = await fetchBatchesByDepartment(departmentId);
+      console.log(response);
       if (response.success) {
         setBatches(response.data || response.data?.batches || []);
       }

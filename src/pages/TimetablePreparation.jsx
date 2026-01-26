@@ -75,6 +75,7 @@ const TimetablePreparation = () => {
   const fetchBatches = async (departmentId) => {
     try {
       const response = await fetchBatchesByDepartment(departmentId);
+      console.log(batches);
       if (response.success) {
         setBatches(response.data.batches || response.data);
       }
@@ -84,8 +85,10 @@ const TimetablePreparation = () => {
   };
 
   const fetchAllocations = async (departmentId, batchId, section) => {
+    
     try {
       const response = await fetchTeacherandSubjectAllocations(departmentId, batchId, section);
+      console.log(response)
       if (response.success) {
         console.log("Allocations fetched:", response.data);
         setAllocations(response.data);
@@ -423,7 +426,7 @@ const TimetablePreparation = () => {
                 >
                   <option value="">Select Batch</option>
                   {batches.map((batch) => (
-                    <option key={batch._id} value={batch._id}>
+                    <option key={batch._id} value={batch.batchId}>
                       {batch.batchName}
                     </option>
                   ))}
