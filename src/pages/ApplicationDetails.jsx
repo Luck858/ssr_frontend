@@ -51,6 +51,7 @@ function ApplicationDetails() {
     const fetchData = async () => {
       try {
         const response = await getApplicationById(id);
+        console.log('Application response:', response);
         if (response.success) {
           const app = response.data[0];
           setData(app);

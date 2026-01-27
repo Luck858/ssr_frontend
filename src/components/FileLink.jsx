@@ -1,19 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, FileIcon, Download, Eye } from 'lucide-react';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 /**
  * Enhanced FileLink Component for S3 and Local URLs
  * - Displays images with inline preview
  * - Shows file type icons for non-image files
  * - Opens modal preview for better viewing
- * - Handles both S3 URLs and local URLs
+ * - Auto-refreshes expired S3 URLs on-demand
  */
 export const FileLink = ({ label, file }) => {
   const [showModal, setShowModal] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState(file?.url);
+  const [loading, setLoading] = useState(false);
 
-  if (!file || !file.url) return null;
+  // Refresh URL if it has an S3 key (for expired URLs)
+  const refreshUrl = async () => {
+    if (!file?.key) return;
+    
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/api/files/get-url?s3Key=${encodeURIComponent(file.key)}`);
+      const data = await response.json();
+      
+      if (data.success && data.url) {
+        setCurrentUrl(data.url);
+      }
+    } catch (error) {
+      console.error('Failed to refresh URL:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const url = file.url;
+  // Auto-refresh URL on mount if needed
+  useEffect(() => {
+    if (file?.key && !currentUrl) {
+      refreshUrl();
+    }
+  }, [file?.key]);
+
+  if (!file) return null;
+
+  const url = currentUrl || file?.url;
+  
+  if (!url) {
+    return (
+      <div style={styles.fileRow}>
+        <span style={styles.fileLabel}>{label}</span>
+        <button 
+          style={styles.refreshBtn}
+          onClick={refreshUrl}
+          disabled={loading}
+        >
+          {loading ? 'Refreshing...' : 'Fetch URL'}
+        </button>
+      </div>
+    );
+  }
   const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(url);
   const isPdf = /\.pdf$/i.test(url);
   
@@ -107,6 +152,17 @@ const styles = {
     display: 'flex',
     gap: 8,
     alignItems: 'center',
+  },
+  refreshBtn: {
+    padding: '6px 12px',
+    background: '#f59e0b',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
   },
   iconBtn: {
     display: 'flex',
