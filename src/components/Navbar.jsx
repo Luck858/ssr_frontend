@@ -50,7 +50,7 @@ const Navbar = () => {
       if (sub === "About Us") return "/about";
       if (sub === "Vision & Mission") return "/about/vision-mission";
       if (sub === "Chairman Message") return "/about/chairman-message";
-      if (sub === "Faculty") return "/faculty";
+      if (sub === "Faculty") return "/about/faculty";
     }
     return "#";
   };

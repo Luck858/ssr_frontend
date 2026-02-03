@@ -1,444 +1,285 @@
 import { useState, useEffect } from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { Users } from "lucide-react";
 import { getPublicFaculty } from "../services/authService";
 
 const ViewUploadedImages = () => {
   const [teachers, setTeachers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState({ totalTeachers: 0, departments: {} });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTeachers();
   }, []);
 
   const fetchTeachers = async () => {
-    setLoading(true);
     try {
-      const response = await getPublicFaculty({
-        limit: 500,
-      });
-      
+      const response = await getPublicFaculty({ limit: 500 });
       if (response.success) {
-        const teacherList = response.data || [];
-        setTeachers(teacherList);
-        
-        // Calculate stats
-        const deptCount = {};
-        teacherList.forEach(teacher => {
-          const deptName = teacher.department?.departmentName || 'Other';
-          deptCount[deptName] = (deptCount[deptName] || 0) + 1;
-        });
-        
-        setStats({
-          totalTeachers: teacherList.length,
-          departments: deptCount
-        });
+        setTeachers(response.data || []);
       }
-    } catch (error) {
-      console.error("Error fetching teachers:", error);
+    } catch (err) {
+      console.error(err);
     } finally {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 800);
     }
   };
 
-  // Group teachers by department
-  const groupedTeachers = teachers.reduce((groups, teacher) => {
-    const deptName = teacher.department?.departmentName || 'Other';
-    if (!groups[deptName]) {
-      groups[deptName] = [];
-    }
-    groups[deptName].push(teacher);
-    return groups;
+  const groupedTeachers = teachers.reduce((acc, t) => {
+    const dept = t.department?.departmentName || "Other";
+    acc[dept] = acc[dept] || [];
+    acc[dept].push(t);
+    return acc;
   }, {});
 
   return (
     <>
+      <Navbar />
+
       <style>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
+        :root {
+          --primary: #1b4f72;
+          --secondary: #2e86c1;
+          --gold: #d4ac0d;
+          --bg-soft: #f4f8fb;
         }
 
-        body {
-          background: #f8f9fa;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          color: #333;
-        }
-
-        .faculty-container {
-          width: 100%;
-          min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 60px 20px;
-        }
-
-        .faculty-hero {
-          max-width: 1200px;
-          margin: 0 auto 60px;
-          text-align: center;
-          color: white;
-        }
-
-        .faculty-title {
-          font-size: clamp(32px, 5vw, 48px);
-          font-weight: 700;
-          margin-bottom: 16px;
+        /* ================= HERO ================= */
+        .faculty-header {
+          min-height: 260px;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 16px;
+          color: white;
+          background: linear-gradient(
+            rgba(27,79,114,.75),
+            rgba(46,134,193,.55)
+          ),
+          url("https://images.unsplash.com/photo-1524995997946-a1c2e315a42f")
+          center/cover;
         }
 
-        .faculty-subtitle {
-          font-size: 18px;
-          opacity: 0.95;
-          margin-bottom: 32px;
-          font-weight: 300;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 20px;
-          margin-bottom: 40px;
-        }
-
-        .stat-card {
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(10px);
-          padding: 24px;
-          border-radius: 12px;
-          text-align: center;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .stat-number {
+        .faculty-title {
           font-size: 36px;
-          font-weight: 700;
-          margin-bottom: 8px;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          gap: 12px;
         }
 
-        .stat-label {
-          font-size: 14px;
-          opacity: 0.9;
-          text-transform: uppercase;
-          letter-spacing: 1px;
+        /* ================= WRAPPER ================= */
+        .faculty-wrapper {
+          max-width: 1250px;
+          margin: 60px auto;
+          padding: 20px;
         }
 
-        .departments-section {
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .department-block {
-          margin-bottom: 50px;
+        /* ================= DEPARTMENT ================= */
+        .dept-block {
+          margin-bottom: 60px;
         }
 
         .dept-header {
-          background: white;
-          padding: 20px 30px;
-          border-radius: 12px 12px 0 0;
-          border-bottom: 4px solid #667eea;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+          padding: 14px 22px;
+          background: var(--bg-soft);
+          border-left: 5px solid var(--gold);
+          border-radius: 10px;
+          margin-bottom: 22px;
         }
 
         .dept-name {
-          font-size: 24px;
+          font-size: 22px;
           font-weight: 700;
-          color: #333;
+          color: var(--primary);
         }
 
         .dept-count {
-          background: #667eea;
+          background: var(--secondary);
           color: white;
-          padding: 6px 14px;
+          padding: 6px 16px;
           border-radius: 20px;
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
         }
 
-        .teachers-grid {
-          background: white;
-          padding: 30px;
-          border-radius: 0 0 12px 12px;
+        /* ================= GRID ================= */
+        .faculty-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-          gap: 24px;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 32px;
         }
 
-        .teacher-card {
-          background: #fff;
-          border-radius: 12px;
+        /* ================= CARD ================= */
+        .faculty-card {
+          position: relative;
+          height: 360px;
+          border-radius: 20px;
           overflow: hidden;
-          transition: all 0.3s ease;
-          border: 1px solid #e0e0e0;
-          display: flex;
-          flex-direction: column;
+          background: #ddd;
+          cursor: pointer;
+          box-shadow: 0 10px 30px rgba(0,0,0,.12);
+          transition: transform .45s ease, box-shadow .45s ease;
+        }
+
+        .faculty-card:hover {
+          transform: translateY(-14px);
+          box-shadow: 0 22px 45px rgba(27,79,114,.35);
+        }
+
+        .faculty-img {
+          width: 100%;
           height: 100%;
         }
 
-        .teacher-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2);
-          border-color: #667eea;
-        }
-
-        .teacher-photo {
-          width: 100%;
-          height: 240px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          overflow: hidden;
-          position: relative;
-        }
-
-        .teacher-photo img {
+        .faculty-img img {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          transition: transform .6s ease;
         }
 
-        .teacher-info {
-          padding: 20px;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
+        .faculty-card:hover img {
+          transform: scale(1.1);
         }
 
-        .teacher-name {
-          font-size: 16px;
+        /* Overlay */
+        .faculty-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            to top,
+            rgba(0,0,0,.7),
+            rgba(0,0,0,.25),
+            transparent
+          );
+        }
+
+        /* ================= INFO SLIDE ================= */
+        .faculty-info {
+          position: absolute;
+          bottom: -65px;
+          width: 100%;
+          padding: 22px;
+          color: white;
+          transition: bottom .45s ease;
+        }
+
+        .faculty-card:hover .faculty-info {
+          bottom: 0;
+        }
+
+        .faculty-name {
+          font-size: 19px;
           font-weight: 700;
-          color: #333;
-          margin-bottom: 4px;
-          line-height: 1.3;
+          margin-bottom: 6px;
         }
 
-        .teacher-email {
+        .faculty-meta {
+          font-size: 14px;
+          opacity: .9;
+        }
+
+        .faculty-email {
           font-size: 12px;
-          color: #666;
-          margin-bottom: 8px;
+          opacity: .8;
+          margin-top: 6px;
           word-break: break-word;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
         }
 
-        .teacher-details {
-          font-size: 12px;
-          color: #999;
-          line-height: 1.6;
+        /* ================= SKELETON ================= */
+        .skeleton {
+          background: linear-gradient(90deg,#eee,#f5f5f5,#eee);
+          background-size: 200% 100%;
+          animation: sk 1.2s infinite linear;
+          border-radius: 20px;
         }
 
-        .detail-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin-bottom: 4px;
+        @keyframes sk {
+          0% { background-position: 200% 0 }
+          100% { background-position: -200% 0 }
         }
 
-        .empty-state {
-          text-align: center;
-          padding: 80px 20px;
-          color: white;
+        .sk-card {
+          height: 360px;
         }
 
-        .empty-icon {
-          font-size: 64px;
-          margin-bottom: 20px;
-          opacity: 0.7;
-        }
-
-        .empty-text {
-          font-size: 20px;
-          font-weight: 300;
-        }
-
-        .loading-container {
-          text-align: center;
-          padding: 80px 20px;
-          color: white;
-        }
-
-        .loading-spinner {
-          width: 50px;
-          height: 50px;
-          border: 4px solid rgba(255, 255, 255, 0.3);
-          border-top-color: white;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-
+        /* ================= RESPONSIVE ================= */
         @media (max-width: 768px) {
-          .faculty-container {
-            padding: 40px 16px;
-          }
-
           .faculty-title {
-            font-size: 28px;
-            flex-direction: column;
-            gap: 12px;
+            font-size: 26px;
           }
 
-          .dept-header {
-            flex-direction: column;
-            gap: 12px;
-            align-items: flex-start;
-          }
-
-          .dept-count {
-            align-self: flex-start;
-          }
-
-          .teachers-grid {
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 16px;
-            padding: 20px;
-          }
-
-          .stats-grid {
-            grid-template-columns: 1fr;
-            gap: 16px;
+          .faculty-card {
+            height: 320px;
           }
         }
 
         @media (max-width: 480px) {
-          .faculty-container {
-            padding: 30px 12px;
-          }
-
-          .faculty-title {
-            font-size: 24px;
-          }
-
-          .faculty-subtitle {
-            font-size: 16px;
-          }
-
-          .teachers-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
-            padding: 16px;
-          }
-
-          .teacher-photo {
-            height: 180px;
-          }
-
-          .dept-name {
-            font-size: 18px;
+          .faculty-grid {
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
           }
         }
       `}</style>
 
-      <div className="faculty-container">
-        {loading ? (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p style={{ fontSize: '18px', marginTop: '20px' }}>Loading Faculty Directory...</p>
-          </div>
-        ) : (
-          <>
-            <div className="faculty-hero">
-              <h1 className="faculty-title">
-                <Users size={40} />
-                Our Faculty
-              </h1>
-              <p className="faculty-subtitle">
-                Meet our dedicated team of experienced educators
-              </p>
+      {/* ================= HERO ================= */}
+      <div className="faculty-header">
+        <h1 className="faculty-title">
+          <Users size={36} /> Our Faculty
+        </h1>
+      </div>
 
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-number">{stats.totalTeachers}</div>
-                  <div className="stat-label">Total Faculties</div>
+      {/* ================= CONTENT ================= */}
+      <div className="faculty-wrapper">
+        {loading ? (
+          <div className="faculty-grid">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="skeleton sk-card" />
+            ))}
+          </div>
+        ) : Object.keys(groupedTeachers).length === 0 ? (
+          <p style={{ textAlign: "center", fontSize: 18 }}>
+            No faculty data available
+          </p>
+        ) : (
+          Object.keys(groupedTeachers).map((dept) => (
+            <div key={dept} className="dept-block">
+              <div className="dept-header">
+                <div className="dept-name">{dept}</div>
+                <div className="dept-count">
+                  {groupedTeachers[dept].length} Members
                 </div>
-                <div className="stat-card">
-                  <div className="stat-number">{Object.keys(stats.departments).length}</div>
-                  <div className="stat-label">Departments</div>
-                </div>
+              </div>
+
+              <div className="faculty-grid">
+                {groupedTeachers[dept].map((t) => (
+                  <div key={t._id} className="faculty-card">
+                    <div className="faculty-img">
+                      {t.photo ? (
+                        <img src={t.photo} alt={t.name} />
+                      ) : (
+                        <div className="skeleton" style={{ height: "100%" }} />
+                      )}
+                    </div>
+
+                    <div className="faculty-overlay" />
+
+                    <div className="faculty-info">
+                      <div className="faculty-name">{t.name}</div>
+                      <div className="faculty-meta">{t.designation}</div>
+                      <div className="faculty-email">{t.email}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {stats.totalTeachers === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">👨‍🎓</div>
-                <p className="empty-text">No faculty members available at the moment</p>
-              </div>
-            ) : (
-              <div className="departments-section">
-                {Object.keys(groupedTeachers)
-                  .sort()
-                  .map((deptName) => (
-                    <div key={deptName} className="department-block">
-                      <div className="dept-header">
-                        <div className="dept-name">{deptName}</div>
-                        <div className="dept-count">
-                          {groupedTeachers[deptName].length} Faculty Member{groupedTeachers[deptName].length !== 1 ? 's' : ''}
-                        </div>
-                      </div>
-                      <div className="teachers-grid">
-                        {groupedTeachers[deptName].map((teacher) => (
-                          <div key={teacher._id} className="teacher-card">
-                            <div className="teacher-photo">
-                              {teacher.photo ? (
-                                <img src={teacher.photo} alt={teacher.name} />
-                              ) : (
-                                <div
-                                  style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '60px',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    color: 'rgba(255,255,255,0.3)',
-                                  }}
-                                >
-                                  👨‍🏫
-                                </div>
-                              )}
-                            </div>
-                            <div className="teacher-info">
-                              <div>
-                                <div className="teacher-name">{teacher.name}</div>
-                                <div className="teacher-email">{teacher.email}</div>
-                              </div>
-                              <div className="teacher-details">
-                                {teacher.designation && (
-                                  <div className="detail-item">
-                                    <span>📌</span>
-                                    <span>{teacher.designation}</span>
-                                  </div>
-                                )}
-                                {teacher.bloodGroup && (
-                                  <div className="detail-item">
-                                    <span>🩸</span>
-                                    <span>{teacher.bloodGroup}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </>
+          ))
         )}
       </div>
+
+      <Footer />
     </>
   );
 };
