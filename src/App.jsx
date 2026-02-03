@@ -41,6 +41,7 @@ import TeacherBranchStudents from './pages/SectionStudents';
 import TeacherClasses from './pages/TeacherClasses';
 import TeacherProfile from './pages/TeacherProfile';
 import AdminGallery from "./pages/AdminGallery";
+import ViewUploadedImages from "./pages/ViewUploadedImages";
 import StudentAttendanceView from "./pages/StudentAttendanceView";
 import SubjectManagement from "./pages/SubjectManagement";
 import SemesterManagement from "./pages/SemesterManagement";
@@ -97,6 +98,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/placements" element={<Placements />} />
           <Route path="/about" element={<AboutUs />} />
+          <Route path="/faculty" element={<ViewUploadedImages />} />
           <Route path="/about/vision-mission" element={<VisionMission />} />
           <Route path="/about/chairman-message" element={<ChairmanMessage />} />
           <Route path="/departments/:id" element={<Department />} />
@@ -203,6 +205,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminRegisterUser />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/view-uploaded-images"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ViewUploadedImages />
               </ProtectedRoute>
             }
           />

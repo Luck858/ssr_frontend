@@ -111,7 +111,11 @@ export const removeUser = () => {
 
 export const adminRegisterUser = async (userData) => {
   try {
-    const response = await api.post('/api/admin/register-user', userData);
+    const response = await api.post('/api/admin/register-user', userData, {
+      headers: {
+        'Content-Type': userData instanceof FormData ? 'multipart/form-data' : 'application/json',
+      },
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Network error' };
@@ -163,6 +167,27 @@ export const getAllUsersForTeacher = async (filters = {}) => {
 export const getMyStudents = async () => {
   try {
     const response = await api.get('/api/teacher/my-students');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Network error' };
+  }
+};
+
+export const getUsersWithPhotos = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams(filters).toString();
+    const response = await api.get(`/api/user/photos?${queryParams}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Network error' };
+  }
+};
+
+export const getPublicFaculty = async (filters = {}) => {
+  try {
+    const queryParams = new URLSearchParams(filters).toString();
+    // Use axios without auth for public endpoint
+    const response = await axios.get(`${API_URL}/api/user/public/faculty?${queryParams}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Network error' };

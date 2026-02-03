@@ -38,7 +38,7 @@ const Navbar = () => {
 
   const menuItems = [
     { title: "Home", link: "/" },
-    { title: "About", dropdown: ["About Us", "Vision & Mission", "Chairman Message"] },
+    { title: "About", dropdown: ["About Us", "Vision & Mission", "Chairman Message", "Faculty"] },
     { title: "Departments", dynamic: true },
     { title: "Admissions", dropdown: ["How to Apply", "Eligibility", "Fee Structure", "Scholarships"] },
     { title: "Placements", dropdown: ["Placement Cell", "Training", "Recruiters", "Records"] },
@@ -50,6 +50,7 @@ const Navbar = () => {
       if (sub === "About Us") return "/about";
       if (sub === "Vision & Mission") return "/about/vision-mission";
       if (sub === "Chairman Message") return "/about/chairman-message";
+      if (sub === "Faculty") return "/faculty";
     }
     return "#";
   };
@@ -413,6 +414,26 @@ const Navbar = () => {
             )}
           </div>
         ))}
+
+        <div style={{ marginTop: "20px", paddingTop: "20px", borderTop: "1px solid #eee" }}>
+          <Link
+            to="/login"
+            onClick={() => setMobileOpen(false)}
+            style={{
+              display: "block",
+              background: "#7A54B1",
+              color: "white",
+              padding: "12px",
+              borderRadius: "8px",
+              textAlign: "center",
+              fontWeight: "600",
+              textDecoration: "none",
+              width: "100%"
+            }}
+          >
+            Login
+          </Link>
+        </div>
       </div>
     </>
   );

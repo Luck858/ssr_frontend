@@ -274,20 +274,41 @@ const [courseDepartments, setCourseDepartments] = useState([]);
     setSubmitting(true);
 
     try {
-      const payload = { ...formData };
-      if (formData.photoFile) {
-        const fileToBase64 = (file) =>
-          new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (err) => reject(err);
-            reader.readAsDataURL(file);
-          });
-        try {
-          const b64 = await fileToBase64(formData.photoFile);
-          payload.photo = b64;
-        } catch (err) {
-          console.error('Failed to convert photo to base64', err);
+      const payload = new FormData();
+      
+      // Add all string and basic fields
+      payload.append('name', formData.name);
+      payload.append('email', formData.email);
+      payload.append('password', formData.password);
+      payload.append('role', formData.role);
+      payload.append('phone', formData.phone);
+      payload.append('department', formData.department);
+      
+      if (formData.role === 'student') {
+        payload.append('course', formData.course);
+        payload.append('batch', formData.batch);
+        payload.append('section', formData.section);
+        payload.append('semester', formData.semester);
+        payload.append('enrollmentId', formData.enrollmentId);
+      }
+      
+      if (formData.role === 'teacher') {
+        payload.append('employeeId', formData.employeeId);
+        payload.append('joiningYear', formData.joiningYear);
+        payload.append('designation', formData.designation);
+        payload.append('dob', formData.dob);
+        payload.append('bloodGroup', formData.bloodGroup);
+        payload.append('officialDetails', formData.officialDetails);
+        payload.append('panNumber', formData.panNumber);
+        payload.append('aadhaarNumber', formData.aadhaarNumber);
+        payload.append('salary', formData.salary);
+        payload.append('address', formData.address);
+        payload.append('remarks', formData.remarks);
+        payload.append('canRegisterStudents', formData.canRegisterStudents);
+        
+        // Add photo file directly
+        if (formData.photoFile) {
+          payload.append('photo', formData.photoFile);
         }
       }
 
