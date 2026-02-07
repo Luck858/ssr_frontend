@@ -233,24 +233,6 @@ export default function MultiStepForm() {
               >
                 Back to top
               </button>
-
-              <button
-                onClick={() => {
-                  // quick client-side save: call CombinedApplicantDetails' save via onNext with advance:false
-                  // We'll reuse handleCombinedNext with advance:false to just persist locally
-                  handleCombinedNext(formData, { advance: false });
-                  alert("Draft saved locally.");
-                }}
-                className="msf-control-btn"
-                style={{
-                  border: "none",
-                  background: "linear-gradient(90deg,#06b6d4,#2563eb)",
-                  color: "white"
-                }}
-                disabled={submitting}
-              >
-                {submitting ? "Submitting..." : "Save draft"}
-              </button>
             </div>
           </div>
         </main>

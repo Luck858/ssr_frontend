@@ -79,34 +79,42 @@ export default function SavedDraftsList({ onResumeDraft, onEditDraft }) {
   const getProgressPercentage = (draftData) => {
     if (!draftData) return 0;
     let completed = 0;
-    let total = 0;
+    let total = 3; // 3 steps
 
-    // Count completed fields
-    if (draftData.studentDetails) {
-      const required = ['studentName', 'fatherName', 'motherName', 'dateOfBirth', 'gender'];
-      required.forEach((field) => {
-        total++;
-        if (draftData.studentDetails[field]) completed++;
-      });
-    }
+    // STEP 1: Personal, Address, Contact Details
+    const step1Required = [
+      draftData.studentDetails?.studentName,
+      draftData.studentDetails?.fatherName,
+      draftData.studentDetails?.motherName,
+      draftData.studentDetails?.dateOfBirth,
+      draftData.studentDetails?.gender,
+      draftData.addressDetails?.houseNo,
+      draftData.addressDetails?.street,
+      draftData.addressDetails?.village,
+      draftData.addressDetails?.mandal,
+      draftData.addressDetails?.district,
+      draftData.addressDetails?.pinCode,
+      draftData.contactDetails?.mobileNo,
+      draftData.contactDetails?.email,
+    ];
+    const step1Filled = step1Required.filter(Boolean).length;
+    if (step1Filled === step1Required.length) completed++;
 
-    if (draftData.addressDetails) {
-      const required = ['houseNo', 'street', 'village', 'mandal', 'district', 'pinCode'];
-      required.forEach((field) => {
-        total++;
-        if (draftData.addressDetails[field]) completed++;
-      });
-    }
+    // STEP 2: Other Details, Uploads, Study Details, Preferences
+    const step2HasData = 
+      (draftData.otherDetails && Object.keys(draftData.otherDetails).some((k) => !!draftData.otherDetails[k])) ||
+      (draftData.uploadedFiles && Object.keys(draftData.uploadedFiles).length > 0) ||
+      (Array.isArray(draftData.studyDetails) && draftData.studyDetails.some((r) => r && Object.keys(r).length)) ||
+      (draftData.preferences && Object.keys(draftData.preferences).some((k) => !!draftData.preferences[k]));
+    if (step2HasData) completed++;
 
-    if (draftData.contactDetails) {
-      const required = ['mobileNo', 'email'];
-      required.forEach((field) => {
-        total++;
-        if (draftData.contactDetails[field]) completed++;
-      });
-    }
+    // STEP 3: Signature & Passport Photo
+    const step3HasData =
+      draftData.signatureUpload?.studentSignature ||
+      draftData.signatureUpload?.passportSizePhoto;
+    if (step3HasData) completed++;
 
-    return total > 0 ? Math.round((completed / total) * 100) : 0;
+    return Math.round((completed / total) * 100);
   };
 
   if (loading) {
