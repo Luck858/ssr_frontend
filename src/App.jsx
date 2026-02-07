@@ -98,7 +98,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/placements" element={<Placements />} />
           <Route path="/about" element={<AboutUs />} />
-          <Route path="/faculty" element={<ViewUploadedImages />} />
+          <Route path="/about/faculty" element={<ViewUploadedImages />} />
           <Route path="/about/vision-mission" element={<VisionMission />} />
           <Route path="/about/chairman-message" element={<ChairmanMessage />} />
           <Route path="/departments/:id" element={<Department />} />

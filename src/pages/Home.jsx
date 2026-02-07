@@ -51,9 +51,9 @@ const HomePage = () => {
       </section>
 
       {/* ================= MANAGEMENT ================= */}
-      <section className="section section-soft compact">
+      {/* <section className="section section-soft compact">
         <ManagementSection />
-      </section>
+      </section> */}
 
       {/* ================= STATS ================= */}
       <section className="section section-white compact">
