@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { Users, BookOpen, Building, FileText } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useNavigate } from "react-router-dom";
 import {
   getAllUsers,
   getDashboardStats,
@@ -18,8 +17,6 @@ const AdminDashboard = () => {
   });
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -41,13 +38,6 @@ const AdminDashboard = () => {
 
     fetchDashboardData();
   }, []);
-
-  const handleLogout = () => {
-    if (!window.confirm("Are you sure you want to logout?")) return;
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
 
   return (
     <>
@@ -198,35 +188,10 @@ const AdminDashboard = () => {
           background: var(--primary-soft);
         }
 
-        /* Logout Button */
-        .logout-btn {
-          padding: 10px 18px;
-          background: linear-gradient(
-            135deg,
-            var(--primary-dark),
-            var(--primary)
-          );
-          color: #fff;
-          border: none;
-          border-radius: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: 0.25s ease;
-        }
-
-        .logout-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 24px rgba(173,143,248,0.4);
-        }
-
         /* Mobile */
         @media (max-width: 768px) {
           .dashboard-grid {
             grid-template-columns: 1fr;
-          }
-
-          .logout-btn {
-            width: 100%;
           }
         }
       `}</style>
@@ -244,9 +209,6 @@ const AdminDashboard = () => {
         >
           <div className="dashboard-header">
             <h1 className="page-title">Admin Dashboard</h1>
-            <button className="logout-btn" onClick={handleLogout}>
-              Logout
-            </button>
           </div>
 
           <div className="dashboard-grid">

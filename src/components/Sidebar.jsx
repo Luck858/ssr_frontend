@@ -19,13 +19,15 @@ import {
   ChevronDown,
   ChevronRight,
   CheckCheckIcon,
+  LogOut,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Sidebar = ({ onToggle }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const [openSections, setOpenSections] = useState({}); // for grouped items
@@ -34,6 +36,12 @@ const Sidebar = ({ onToggle }) => {
     const next = !isOpen;
     setIsOpen(next);
     if (onToggle) onToggle(next);
+  };
+
+  const handleLogout = () => {
+    if (!window.confirm("Are you sure you want to logout?")) return;
+    logout();
+    navigate("/login");
   };
 
   const toggleSection = (key) => {
@@ -593,6 +601,11 @@ const Sidebar = ({ onToggle }) => {
           flex-grow: 1;
           padding: 10px;
           overflow-y: auto;
+          scrollbar-width: none;
+        }
+
+        .sidebar-scrollable::-webkit-scrollbar {
+          display: none;
         }
 
         .sidebar-nav {
@@ -680,6 +693,49 @@ const Sidebar = ({ onToggle }) => {
 
         .nav-subicon {
           min-width: 18px;
+        }
+
+        /* LOGOUT BUTTON */
+        .sidebar-footer {
+          padding: 10px;
+          border-top: 1px solid #e0e0e0;
+          background: var(--card-bg);
+        }
+
+        .logout-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          width: 100%;
+          padding: 14px;
+          background: linear-gradient(135deg, var(--accent), #8b6fe6);
+          color: white;
+          border: none;
+          border-radius: 14px;
+          font-weight: 600;
+          font-size: 15px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 18px rgba(173, 143, 248, 0.3);
+        }
+
+        .logout-btn:active {
+          transform: translateY(-2px);
+        }
+
+        .logout-btn svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        .logout-btn-text {
+          flex: 1;
+          text-align: center;
         }
       `}</style>
 
@@ -792,6 +848,14 @@ const Sidebar = ({ onToggle }) => {
               );
             })}
           </nav>
+        </div>
+
+        {/* FOOTER WITH LOGOUT */}
+        <div className="sidebar-footer">
+          <button className="logout-btn" onClick={handleLogout}>
+            <LogOut size={18} />
+            {isOpen && <span className="logout-btn-text">Logout</span>}
+          </button>
         </div>
       </div>
     </>
